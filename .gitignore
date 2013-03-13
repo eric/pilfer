@@ -1,0 +1,7 @@
+## General
+pkg/*
+
+## Bundler
+*.gem
+.bundle
+Gemfile.lock

@@ -1,0 +1,23 @@
+GIT
+  remote: git://github.com/tmm1/rblineprof.git
+  revision: f68301ac7a3f19280d475f233b6c08bdf8124303
+  specs:
+    rblineprof (0.3.1)
+      debugger-ruby_core_source (~> 1.2)
+
+PATH
+  remote: .
+  specs:
+    pilfer (0.0.1)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    debugger-ruby_core_source (1.2.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  pilfer!
+  rblineprof!
