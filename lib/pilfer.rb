@@ -17,12 +17,13 @@ module Pilfer
     end
 
     def call(env)
-      response = nil
-      profile  = lineprof(match) do
+      profile_start = Time.now.utc
+      response      = nil
+      profile       = lineprof(match) do
         response = @app.call(env)
       end
 
-      payload = RbLineProfFormat.profile_to_json(profile)
+      payload = RbLineProfFormat.profile_to_json(profile, profile_start)
       payload['file_contents'] = file_contents_for_profile(profile)
       submit_profile payload
 
@@ -46,7 +47,7 @@ module Pilfer
 
   # Formatting a profile as JSON may eventually be provided by rblineprof.
   class RbLineProfFormat
-    def self.profile_to_json(profile)
+    def self.profile_to_json(profile, profile_start)
       files = profile.each_with_object({}) do |(file, lines), files|
         total, child, exclusive, total_cpu, child_cpu, excl_cpu = lines[0]
         lines = lines[1..-1].
@@ -68,7 +69,7 @@ module Pilfer
       {
         'profile' => {
           'version'   => '0.2.5',
-          'timestamp' => Time.now.utc.to_i,
+          'timestamp' => profile_start.to_i,
           'files'     => files
         }
       }
