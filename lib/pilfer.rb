@@ -53,7 +53,7 @@ module Pilfer
     end
 
     def post_profile_payload(payload)
-      uri   = URI.parse(ENV['PILFER_URL'] || 'http://google.com:1234')
+      uri   = URI.parse(ENV['PILFER_URL'])
       token = ENV['PILFER_TOKEN']
 
       request = Net::HTTP::Post.new('/api/v1/profiles')
