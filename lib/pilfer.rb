@@ -53,8 +53,7 @@ module Pilfer
     end
 
     def post_profile_payload(payload)
-      host  = ENV['PILFER_HOST'] || 'localhost'
-      port  = ENV['PILFER_PORT'] || 80
+      uri   = URI.parse(ENV['PILFER_URL'] || 'http://google.com:1234')
       token = ENV['PILFER_TOKEN']
 
       request = Net::HTTP::Post.new('/api/v1/profiles')
@@ -62,7 +61,7 @@ module Pilfer
       request['Authorization'] = %{Token token="#{token}"}
       request.body = JSON.generate(payload)
 
-      http = Net::HTTP.new(host, port)
+      http = Net::HTTP.new(uri.host, uri.port)
 
       # TODO: Use SSL
       # http.verify_mode = OpenSSL::SSL::VERIFY_PEER
