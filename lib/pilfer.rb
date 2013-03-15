@@ -6,10 +6,10 @@ module Pilfer
 
     attr_reader :app, :app_root, :match
 
-    def initialize(app, app_root, match = :default)
+    def initialize(app, options = {})
       @app      = app
-      @app_root = File.expand_path(app_root)
-      @match    = match == :default ? default_match : match
+      @app_root = File.expand_path(options.fetch(:app_root, '.'))
+      @match    = options.fetch(:match, default_match)
     end
 
     def default_match
@@ -25,16 +25,56 @@ module Pilfer
 
       payload = RbLineProfFormat.profile_to_json(profile, profile_start)
       payload['file_contents'] = file_contents_for_profile(profile)
-      submit_profile payload
+      # log_profile_payload payload
+      submit_profile_payload payload
 
       response
     end
 
-    def submit_profile(payload)
+    def log_profile_payload(payload)
       require 'json'
       log = File.join(app_root, 'pilfer.log')
       File.open(log, 'a') do |log|
         log.puts JSON.pretty_generate(payload)
+      end
+    end
+
+    def submit_profile_payload(payload)
+      post_profile_payload(payload)
+
+      # TODO: Post profile in a thread.
+      # Thread.new(payload) do |payload|
+      #   begin
+      #     post_profile_payload(payload)
+      #   rescue Exception => ex
+      #     log_error(ex)
+      #   end
+      # end
+    end
+
+    def post_profile_payload(payload)
+      host  = ENV['PILFER_HOST'] || 'localhost'
+      port  = ENV['PILFER_PORT'] || 80
+      token = ENV['PILFER_TOKEN']
+
+      request = Net::HTTP::Post.new('/api/v1/profiles')
+      request.content_type = 'application/json'
+      request['Authorization'] = %{Token token="#{token}"}
+      request.body = JSON.generate(payload)
+
+      http = Net::HTTP.new(host, port)
+
+      # TODO: Use SSL
+      # http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+      # http.use_ssl = true
+      # store = OpenSSL::X509::Store.new
+      # store.set_default_paths
+      # http.cert_store = store
+
+      case (response = http.start {|http| http.request(request) })
+      when Net::HTTPSuccess, Net::HTTPRedirection
+      else
+        response.error!
       end
     end
 
