@@ -63,12 +63,13 @@ module Pilfer
 
       http = Net::HTTP.new(uri.host, uri.port)
 
-      # TODO: Use SSL
-      # http.verify_mode = OpenSSL::SSL::VERIFY_PEER
-      # http.use_ssl = true
-      # store = OpenSSL::X509::Store.new
-      # store.set_default_paths
-      # http.cert_store = store
+      if uri.scheme == 'https'
+        http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+        http.use_ssl = true
+        store = OpenSSL::X509::Store.new
+        store.set_default_paths
+        http.cert_store = store
+      end
 
       case (response = http.start {|http| http.request(request) })
       when Net::HTTPSuccess, Net::HTTPRedirection
