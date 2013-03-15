@@ -9,7 +9,7 @@ module Pilfer
     def initialize(app, options = {})
       @app      = app
       @app_root = File.expand_path(options.fetch(:app_root, '.'))
-      @match    = options.fetch(:match, default_match)
+      @match    = options[:match] || default_match
     end
 
     def default_match
