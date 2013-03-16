@@ -1,5 +1,12 @@
 require 'rblineprof'
 
+# Pilfer::Profiler.profile(:app_root       => '/dev/null',
+#                          :file_matcher   => %r{...},
+#                          :service_url    => 'http://pilfer.com',
+#                          :service_token  => 'abc123') {
+#   do_something
+# }
+
 module Pilfer
   class Profiler
     attr_reader :app_root, :file_matcher
