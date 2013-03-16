@@ -38,10 +38,10 @@ module Pilfer
       end
 
       description = "#{env['REQUEST_METHOD']} #{env['PATH_INFO']}"
-      details = {'hostname'      => Socket.gethostname,
-                 'pid'           => Process.pid,
-                 'description'   => description,
-                 'file_contents' => file_contents_for_profile(profile)}
+      details = { 'hostname'     => Socket.gethostname,
+                  'pid'          => Process.pid,
+                  'description'  => description,
+                  'file_sources' => file_sources_for_profile(profile) }
 
       payload = RbLineProfFormat.
                   profile_to_json(profile, profile_start).
@@ -94,9 +94,9 @@ module Pilfer
       end
     end
 
-    def file_contents_for_profile(profile)
-      profile.each_with_object({}) {|(file, _), contents|
-        contents[file] = File.exists?(file) ? File.read(file) : nil
+    def file_sources_for_profile(profile)
+      profile.each_with_object({}) {|(file, _), sources|
+        sources[file] = File.exists?(file) ? File.read(file) : nil
       }
     end
   end
