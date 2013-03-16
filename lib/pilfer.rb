@@ -62,16 +62,13 @@ module Pilfer
     end
 
     def submit_profile_payload(payload)
-      post_profile_payload(payload)
-
-      # TODO: Post profile in a thread.
-      # Thread.new(payload) do |payload|
-      #   begin
-      #     post_profile_payload(payload)
-      #   rescue Exception => ex
-      #     log_error(ex)
-      #   end
-      # end
+      Thread.new(payload) do |payload|
+        begin
+          post_profile_payload(payload)
+        rescue Exception => ex
+          $stdout.puts ex.message, ex.backtrace
+        end
+      end
     end
 
     def post_profile_payload(payload)
