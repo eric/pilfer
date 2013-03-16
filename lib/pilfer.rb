@@ -1,15 +1,29 @@
 require 'rblineprof'
+require 'socket'
 
 module Pilfer
   class Middleware
     VERSION = '0.0.1'
 
-    attr_reader :app, :app_root, :match
+    attr_reader :app, :app_root, :match, :service_url, :service_token
 
     def initialize(app, options = {})
-      @app      = app
-      @app_root = File.expand_path(options[:app_root] || '.')
-      @match    = options[:match] || default_match
+      enforce_required_options(options)
+      @app           = app
+      @app_root      = File.expand_path(options[:app_root] || '.')
+      @match         = options[:match] || default_match
+      @service_url   = URI.parse(options[:service_url])
+      @service_token = options[:service_token]
+    end
+
+    def enforce_required_options(options)
+      unless options.has_key?(:service_url)
+        raise 'Pilfer::Middleware requires :service_url'
+      end
+
+      unless options.has_key?(:service_token)
+        raise 'Pilfer::Middleware requires :service_token'
+      end
     end
 
     def default_match
@@ -23,8 +37,16 @@ module Pilfer
         response = @app.call(env)
       end
 
-      payload = RbLineProfFormat.profile_to_json(profile, profile_start)
-      payload['file_contents'] = file_contents_for_profile(profile)
+      description = "#{env['REQUEST_METHOD']} #{env['PATH_INFO']}"
+      details = {'hostname'      => Socket.gethostname,
+                 'pid'           => Process.pid,
+                 'description'   => description,
+                 'file_contents' => file_contents_for_profile(profile)}
+
+      payload = RbLineProfFormat.
+                  profile_to_json(profile, profile_start).
+                  merge(details)
+
       # log_profile_payload payload
       submit_profile_payload payload
 
@@ -53,17 +75,14 @@ module Pilfer
     end
 
     def post_profile_payload(payload)
-      uri   = URI.parse(ENV['PILFER_URL'])
-      token = ENV['PILFER_TOKEN']
-
       request = Net::HTTP::Post.new('/api/v1/profiles')
       request.content_type = 'application/json'
-      request['Authorization'] = %{Token token="#{token}"}
+      request['Authorization'] = %{Token token="#{service_token}"}
       request.body = JSON.generate(payload)
 
-      http = Net::HTTP.new(uri.host, uri.port)
+      http = Net::HTTP.new(service_url.host, service_url.port)
 
-      if uri.scheme == 'https'
+      if service_url.scheme == 'https'
         http.verify_mode = OpenSSL::SSL::VERIFY_PEER
         http.use_ssl = true
         store = OpenSSL::X509::Store.new
