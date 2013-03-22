@@ -77,7 +77,7 @@ You probably don't want to profile _every_ request. The given block will be
 evaluated on each request to determine if a profile should be run.
 
 ```ruby
-use Pilfer::Middleware, reporter do
+use Pilfer::Middleware, reporter do |env|
   # Profile 1% of requests.
   rand(100) == 1
 end
