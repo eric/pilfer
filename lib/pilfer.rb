@@ -3,8 +3,6 @@ require 'socket'
 
 module Pilfer
   class Middleware
-    VERSION = '0.0.1'
-
     attr_reader :app, :app_root, :match, :service_url, :service_token
 
     def initialize(app, options = {})
