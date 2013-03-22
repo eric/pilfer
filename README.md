@@ -4,18 +4,23 @@ Look into your ruby with [rblineprof](https://github.com/tmm1/rblineprof/).
 
 ## Usage
 
-### Deploy pilfer-server
+Profile a block of code saving the report to the file `profile.log`.
 
-[pilfer-server][] is your own, personal service for collecting and viewing
-profiles collected by Pilfer. Follow the [pilfer-server
-instructions][pilfer-server] to stand up a new server and come back here with
-the app's URL and token.
+```ruby
+reporter = Pilfer::Logger.new('pilfer.log')
+profiler = Pilfer::Profiler.new(reporter)
+profiler.profile { do_something }
+```
 
-[pilfer-server]: https://github.com/eric/pilfer-server
+The report prints the source of each line of code executed and includes the
+total execution time and the number of times the line was executed.
 
-### Create a reporter
+_TODO: Show profile response._
 
-Profiles can be reported to either pilfer-server or logged to a file.
+### Step 1: Create a reporter
+
+Profiles can be sent to a [pilfer-server][] or written to a file or `IO`
+object.
 
 ```ruby
 reporter = Pilfer::Server.new('https://pilfer.com', 'abc123')
@@ -23,62 +28,84 @@ reporter = Pilfer::Logger.new('pilfer.log')
 reporter = Pilfer::Logger.new($stdout)
 ```
 
-### Profile a block of code
+The absolute path to each profiled file is used in the report. Set the path to
+the application root with `:app_root` to have it trimmed from reported file
+paths.
 
-After creating the reporter, pass it to a new `Pilfer::Profiler` and profile a
-block of code with `#profile`.
+```ruby
+reporter = Pilfer::Logger.new($stdout, :app_root => '/my/app')
+```
+
+### Step 2: Create a profiler
+
+Pass the reporter to a new `Pilfer::Profiler`.
 
 ```ruby
 profiler = Pilfer::Profiler.new(reporter)
+```
+
+### Step 3: Profile a block of code
+
+Profile a block of code with `#profile`.
+
+```ruby
 profiler.profile { do_something }
-# TODO: Show profile response
 ```
 
-### Options
-
-`Pilfer::Profiler#profile` takes a few optional arguments.
-
-`:app_root`: By default, the full path to each profiled file is used. Pass the
-path to the root of the application to use relative paths instead.
+Every file that's executed by the block--including code outside the
+application like gems and standard libraries--will be included in the profile.
+Provide a regular expression with `:file_matcher` to limit profiling to only
+matching file paths.
 
 ```ruby
-profiler.profile(:app_root => '/my/app') { do_something }
-# TODO: Show profile response
-```
-
-`:file_matcher`: By default, all files will be profiled. Provide a regular
-expression and profiling will be limited to matching file paths.
-
-```ruby
-matcher = %r{^#{Regexp.escape(RAILS_ROOT)}/app/models}
+matcher = %r{^#{Regexp.escape(Rails.root.to_s)}/app/models}
 profiler.profile(:file_matcher => matcher) { do_something }
-# TODO: Show profile response
 ```
 
+## Pilfer Server
 
-### Rack Middleware
-
-Profile your Rack app by using `Pilfer::Middleware`.
+[pilfer-server][] is your own, personal service for collecting and viewing
+profile reports. Follow the [pilfer-server setup instructions][pilfer-server]
+to stand up a new server and send it reports using its URL and token.
 
 ```ruby
+reporter = Pilfer::Server.new('https://pilfer.com', 'abc123')
+```
+
+## Rack Middleware
+
+Profile your Rack or Rails app using `Pilfer::Middleware`.
+
+```ruby
+reporter = Pilfer::Server.new('https://pilfer.com', 'abc123'
+                              :app_root => Rails.root)
 use Pilfer::Middleware, reporter
 ```
 
-#### Middleware Options
-
-Pass options through to `Pilfer::Profiler#profile`.
+Options are passed through to `Pilfer::Profiler#profile`.
 
 ```ruby
-use Pilfer::Middleware, reporter, :app_root     => '/dev/null',
-                                  :file_matcher => %r{...}
+matcher  = %r{^#{Regexp.escape(Rails.root.to_s)}/(app|config|lib|vendor/plugin)}
+use Pilfer::Middleware, reporter, :file_matcher => matcher
 ```
 
 You probably don't want to profile _every_ request. The given block will be
 evaluated on each request to determine if a profile should be run.
 
 ```ruby
-use Pilfer::Middleware, reporter do |env|
+use Pilfer::Middleware, reporter do
   # Profile 1% of requests.
   rand(100) == 1
 end
 ```
+
+The Rack environment is available to allow profiling on demand.
+
+```ruby
+use Pilfer::Middleware, reporter do |env|
+  env.query_string.include? 'profile=true'
+end
+```
+
+
+[pilfer-server]: https://github.com/eric/pilfer-server
