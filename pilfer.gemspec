@@ -4,15 +4,16 @@ File.read(lib_file) =~ /\bVERSION\s*=\s*["'](.+?)["']/
 version = $1
 
 Gem::Specification.new do |spec|
+  spec.specification_version     = 2
+  spec.required_rubygems_version = '>= 1.3.6'
+
   spec.name     = lib
   spec.version  = version
-
-  spec.summary  = "Look into your ruby with rblineprof."
-
+  spec.summary  = "Look into your ruby with rblineprof"
   spec.authors  = ["Eric Lindvall", "Larry Marburger"]
   spec.email    = 'larry@marburger.cc'
   spec.homepage = 'https://github.com/eric/pilfer'
-  spec.license  = 'MIT'
+  spec.licenses = ['MIT']
 
   spec.files = %w(Gemfile LICENSE Rakefile README.md)
   spec.files << "#{lib}.gemspec"
