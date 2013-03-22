@@ -2,29 +2,17 @@ require 'helper'
 require 'pilfer/profiler'
 
 class TestPilferProfiler < MiniTest::Unit::TestCase
-  def options()  {} end
-  def checker()  lambda { true } end
-  def profiler() lambda {|*args| @profiled = true } end
-
   def setup
+    @reporter = Class.new do
+      def write(*args) end
+    end.new
+
+    @profiler = lambda {|*args| @profiled = true }
     @profiled = false
   end
 
-  def test_profiles_when_checker_returns_true
-    checker  = lambda { true }
-    Pilfer::Profiler.profile(options, checker, profiler) {}
-    assert @profiled, 'profiler not called'
-  end
-
-  def test_does_not_profile_when_checker_returns_false
-    checker  = lambda { false }
-    Pilfer::Profiler.profile(options, checker, profiler) {}
-    refute @profiled, 'profiler called'
-  end
-
-  def test_profiles_when_checker_is_nil
-    checker  = nil
-    Pilfer::Profiler.profile(options, checker, profiler) {}
+  def test_profiles
+    Pilfer::Profiler.new(@reporter).profile(@profiler) { }
     assert @profiled, 'profiler not called'
   end
 
@@ -33,35 +21,36 @@ class TestPilferProfiler < MiniTest::Unit::TestCase
       app.call
       :profiler_response
     }
-    profile_response = Pilfer::Profiler.profile(options, checker, profiler) {
+    response = Pilfer::Profiler.new(@reporter).profile(profiler) {
       :app_response
     }
-    assert_equal :app_response, profile_response
+    assert_equal :app_response, response
+  end
+
+  def test_profiles_all_files_by_default
+    profiler = MiniTest::Mock.new
+    profiler.expect :call, nil, [/./]
+    Pilfer::Profiler.new(@reporter).profile(profiler) { }
+    profiler.verify
   end
 
   def test_passes_file_matcher_to_profiler
-    file_matcher = :file_matcher
-    options      = { file_matcher: file_matcher }
-    profiler     = MiniTest::Mock.new
-    profiler.expect :call, nil, [file_matcher]
-    Pilfer::Profiler.profile(options, checker, profiler)
-    profiler.verify
-  end
-
-  def test_passes_uses_default_file_matcher_when_no_matcher_given
-    expected_file_matcher = %r{^#{File.expand_path('.')}/(app|config|lib|vendor/plugin)}
-    profiler     = MiniTest::Mock.new
-    profiler.expect :call, nil, [expected_file_matcher]
-    Pilfer::Profiler.profile(options, checker, profiler)
-    profiler.verify
-  end
-
-  def test_default_file_matcher_anchors_at_app_root
-    options = { app_root: '/dev/null' }
-    expected_file_matcher = %r{^/dev/null/(app|config|lib|vendor/plugin)}
+    matcher  = :matcher
     profiler = MiniTest::Mock.new
-    profiler.expect :call, nil, [expected_file_matcher]
-    Pilfer::Profiler.profile(options, checker, profiler)
+    profiler.expect :call, nil, [matcher]
+    Pilfer::Profiler.new(@reporter).
+      profile_files_matching(matcher, profiler) { }
     profiler.verify
+  end
+
+  def test_writes_profile_to_reporter
+    profiler = lambda {|*args, &app|
+      app.call
+      :profiler_response
+    }
+    reporter = MiniTest::Mock.new
+    reporter.expect :write, nil, [:profiler_response]
+    Pilfer::Profiler.new(reporter).profile(profiler) { }
+    reporter.verify
   end
 end
