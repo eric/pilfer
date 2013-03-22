@@ -54,12 +54,12 @@ profiler.profile { do_something }
 
 Every file that's executed by the block--including code outside the
 application like gems and standard libraries--will be included in the profile.
-Provide a regular expression with `:file_matcher` to limit profiling to only
-matching file paths.
+Use `#profile_files_matching` and provide a regular expression to limit
+profiling to only matching file paths.
 
 ```ruby
 matcher = %r{^#{Regexp.escape(Rails.root.to_s)}/app/models}
-profiler.profile(:file_matcher => matcher) { do_something }
+profiler.profile_files_matching(matcher) { do_something }
 ```
 
 ## Pilfer Server
@@ -82,11 +82,12 @@ reporter = Pilfer::Server.new('https://pilfer.com', 'abc123'
 use Pilfer::Middleware, reporter
 ```
 
-Options are passed through to `Pilfer::Profiler#profile`.
+Restrict the files profiled by passing a regular expression with
+`:files_matching`.
 
 ```ruby
-matcher  = %r{^#{Regexp.escape(Rails.root.to_s)}/(app|config|lib|vendor/plugin)}
-use Pilfer::Middleware, reporter, :file_matcher => matcher
+matcher = %r{^#{Regexp.escape(Rails.root.to_s)}/(app|config|lib|vendor/plugin)}
+use Pilfer::Middleware, reporter, :files_matching => matcher
 ```
 
 You probably don't want to profile _every_ request. The given block will be
