@@ -12,14 +12,27 @@ module Pilfer
 
     def write(profile, profile_start)
       formatted = RbLineProfFormat.format_profile(profile, profile_start)
-      strip_app_root_from_files formatted['profile']['files'] if app_root
-      io.puts JSON.generate(formatted)
+      formatted['profile']['files'].each do |path, data|
+        io.puts strip_app_root(path)
+        file_source = File.read(path).split("\n")
+        file_source.each_with_index do |line_source, index|
+          line_profile = data['lines'][index]
+          if line_profile && line_profile['calls'] > 0
+            total = line_profile['wall_time']
+            io.puts sprintf("% 8.1fms (% 5d) | %s", total/1000.0,
+                                                    line_profile['calls'],
+                                                    line_source)
+          else
+            io.puts sprintf("                   | %s", line_source)
+          end
+        end
+        io.puts
+      end
     end
 
-    def strip_app_root_from_files(files)
-      files.keys.each do |key|
-        files[key.gsub(app_root, '')] = files.delete(key)
-      end
+    def strip_app_root(path)
+      return path unless app_root
+      path.gsub(app_root, '')
     end
   end
 

@@ -6,97 +6,60 @@ require 'pilfer/logger'
 # reporter = Pilfer::Logger.new('pilfer.log')
 # reporter = Pilfer::Logger.new($stdout, :app_root => '/my/app')
 class TestPilferLogger < MiniTest::Unit::TestCase
-  def test_writes_profile
-    start   = Time.at(42)
-    profile = {
-      'one.rb' => [[1001052, 1001021, 19, 50, 28, 13],
-                   [1001052, 50, 1]],
-      'two.rb' => [[1001021, 0, 1001021, 28, 0, 28],
-                   [0, 0, 0],
-                   [1001021, 28, 1]]
-    }
-    expected = {
-      'profile' => {
-        'version'   => '0.2.5',
-        'timestamp' => start.to_i,
-        'files'     => {
-          'one.rb' => {
-            'total'         => 1001052,
-            'child'         => 1001021,
-            'exclusive'     => 19,
-            'total_cpu'     => 50,
-            'child_cpu'     => 28,
-            'exclusive_cpu' => 13,
-            'lines'         => {
-              '0' => {
-                'wall_time' => 1001052,
-                'cpu_time'  => 50,
-                'calls'     => 1
-              }
-            }
-          },
-          'two.rb' => {
-            'total'         => 1001021,
-            'child'         => 0,
-            'exclusive'     => 1001021,
-            'total_cpu'     => 28,
-            'child_cpu'     => 0,
-            'exclusive_cpu' => 28,
-            'lines'         => {
-              '1' => {
-                'wall_time' => 1001021,
-                'cpu_time'  => 28,
-                'calls'     => 1
-              }
-            }
-          }
-        }
-      }
-    }
-    report = StringIO.new
-    Pilfer::Logger.new(report).write(profile, start)
-    assert_equal expected, JSON.parse(report.string)
+  attr_reader :test_root, :profile
+
+  def setup
+    @test_root      = File.expand_path(File.dirname(__FILE__))
+    test_file       = File.join(test_root, 'files', 'profile.json')
+    profile_content = File.read(test_file).gsub('TEST_ROOT', test_root)
+    @profile        = JSON.parse(profile_content)
   end
 
-  def test_omits_app_root
-    profile = {
-      '/my/app/one.rb' => [[1001052, 1001021, 19, 50, 28, 13],
-                          [1001052, 50, 1]],
-      '/my/app/two.rb' => [[1001021, 0, 1001021, 28, 0, 28],
-                          [1001021, 28, 1]]
-    }
+  def test_writes_profile
+    expected = <<-EOS
+#{test_root}/files/test.rb
+                   | require 'bundler/setup'
+                   | require 'pilfer/logger'
+                   | require 'pilfer/profiler'
+                   | require 'stringio'
+                   | 
+                   | output   = StringIO.new
+                   | reporter = Pilfer::Logger.new(output)
+                   | profiler = Pilfer::Profiler.new(reporter)
+                   | path     = File.expand_path(File.dirname(__FILE__))
+                   | 
+                   | profiler.profile_files_matching(%r{^\#{Regexp.escape(path)}}) do
+     5.1ms (    3) |   require 'hello'
+     0.0ms (    4) |   puts 'world!'
+   108.6ms (    1) |   10.times do
+   108.4ms (   10) |     sleep 0.01
+                   |   end
+                   | end
+
+#{test_root}/files/hello.rb
+     0.0ms (    2) | print 'Hello '
+
+EOS
     report = StringIO.new
-    Pilfer::Logger.new(report, :app_root => '/my/app').
-      write(profile, Time.now)
-    keys = JSON.parse(report.string)['profile']['files'].keys
-    assert_equal %w(one.rb two.rb), keys
+    Pilfer::Logger.new(report).write(profile, Time.at(42))
+    assert_equal expected, report.string
   end
 
   def test_omits_app_root_with_trailing_separator
-    profile = {
-      '/my/app/one.rb' => [[1001052, 1001021, 19, 50, 28, 13],
-                          [1001052, 50, 1]],
-      '/my/app/two.rb' => [[1001021, 0, 1001021, 28, 0, 28],
-                          [1001021, 28, 1]]
-    }
+    expected = 'files/test.rb'
     report = StringIO.new
-    Pilfer::Logger.new(report, :app_root => '/my/app/').
-      write(profile, Time.now)
-    keys = JSON.parse(report.string)['profile']['files'].keys
-    assert_equal %w(one.rb two.rb), keys
+    Pilfer::Logger.new(report, :app_root => test_root + '/').
+      write(profile, Time.at(42))
+    first_line = report.string.split("\n").first
+    assert_equal expected, first_line
   end
 
-  def test_only_removes_app_root_from_beginning_of_path
-    profile = {
-      '/my/app/one.rb' => [[1001052, 1001021, 19, 50, 28, 13],
-                          [1001052, 50, 1]],
-      '/my/app/two.rb' => [[1001021, 0, 1001021, 28, 0, 28],
-                          [1001021, 28, 1]]
-    }
+  def test_omits_app_root
+    expected = 'files/test.rb'
     report = StringIO.new
-    Pilfer::Logger.new(report, :app_root => '/app').
-      write(profile, Time.now)
-    keys = JSON.parse(report.string)['profile']['files'].keys
-    assert_equal %w(/my/app/one.rb /my/app/two.rb), keys
+    Pilfer::Logger.new(report, :app_root => test_root).
+      write(profile, Time.at(42))
+    first_line = report.string.split("\n").first
+    assert_equal expected, first_line
   end
 end
