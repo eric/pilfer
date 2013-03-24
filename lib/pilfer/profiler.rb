@@ -1,4 +1,4 @@
-# require 'rblineprof'
+require 'rblineprof'
 
 module Pilfer
   class Profiler
