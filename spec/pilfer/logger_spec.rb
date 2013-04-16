@@ -11,9 +11,20 @@ describe Pilfer::Logger do
     @profile        = JSON.parse(profile_content)
   }
 
+  def first_file_from_reporter(reporter)
+    reporter.string.
+      split("\n\n")[1].
+      split("\n").
+      first
+  end
+
   describe '#write' do
     it 'writes profile to reporter' do
       expected = <<-EOS
+##################################################
+# 1970-01-01 00:00:42 UTC
+##################################################
+
 #{spec_root}/files/test.rb
                    | require 'bundler/setup'
                    | require 'pilfer/logger'
@@ -46,16 +57,14 @@ EOS
       reporter = StringIO.new
       Pilfer::Logger.new(reporter, :app_root => spec_root).
         write(profile, Time.at(42))
-      first_line = reporter.string.lines.first.chomp
-      first_line.should eq('files/test.rb')
+      first_file_from_reporter(reporter).should eq('files/test.rb')
     end
 
     it 'omits app root with trailing separator' do
       reporter = StringIO.new
       Pilfer::Logger.new(reporter, :app_root => spec_root + '/').
         write(profile, Time.at(42))
-      first_line = reporter.string.lines.first.chomp
-      first_line.should eq('files/test.rb')
+      first_file_from_reporter(reporter).should eq('files/test.rb')
     end
   end
 end

@@ -14,6 +14,7 @@ module Pilfer
 
     def write(profile, profile_start)
       formatted = Pilfer::Formatter.json(profile, profile_start)
+      print_banner profile_start
       formatted['profile']['files'].each do |path, data|
         io.puts strip_app_root(path)
         file_source = File.read(path).split("\n")
@@ -35,6 +36,13 @@ module Pilfer
     def strip_app_root(path)
       return path unless app_root
       path.gsub(app_root, '')
+    end
+
+    def print_banner(profile_start)
+      io.puts '#' * 50
+      io.puts "# #{profile_start.utc.to_s}"
+      io.puts '#' * 50
+      io.puts
     end
   end
 end
