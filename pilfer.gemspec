@@ -19,7 +19,7 @@ Gem::Specification.new do |spec|
   spec.test_files = Dir.glob('test/**/*.rb')
 
   spec.add_development_dependency 'bundler', '~> 1.0'
-  spec.add_development_dependency 'minitest'
+  spec.add_development_dependency 'rspec'
   spec.add_development_dependency 'rake'
   spec.add_development_dependency 'rack', '~> 1.5.2'
 
