@@ -1,6 +1,5 @@
 require 'json'
-require 'json'
-require 'stringio'
+require 'tempfile'
 require 'pilfer/logger'
 
 describe Pilfer::Logger do
@@ -10,11 +9,21 @@ describe Pilfer::Logger do
     profile_content = File.read(profile_file).gsub('SPEC_ROOT', spec_root)
     @profile        = JSON.parse(profile_content)
   }
+  let(:reporter) { Tempfile.new('reporter') }
+  let(:start)    { Time.at(42) }
 
-  def first_file_from_reporter(reporter)
-    reporter.string.
+  after do
+    reporter.close
+    reporter.unlink
+  end
+
+  def first_file_from_reporter
+    reporter.
+      read.
       split("\n\n")[1].
       split("\n").
+      first.
+      split(' ').
       first
   end
 
@@ -25,7 +34,7 @@ describe Pilfer::Logger do
 # 1970-01-01 00:00:42 UTC
 ##################################################
 
-#{spec_root}/files/test.rb
+#{spec_root}/files/test.rb wall_time=113.7ms cpu_time=5.3ms
                    | require 'bundler/setup'
                    | require 'pilfer/logger'
                    | require 'pilfer/profiler'
@@ -44,27 +53,24 @@ describe Pilfer::Logger do
                    |   end
                    | end
 
-#{spec_root}/files/hello.rb
+#{spec_root}/files/hello.rb wall_time=0.0ms cpu_time=0.0ms
      0.0ms (    2) | print 'Hello '
 
 EOS
-      reporter = StringIO.new
-      Pilfer::Logger.new(reporter).write(profile, Time.at(42))
-      reporter.string.should eq(expected)
+      Pilfer::Logger.new(reporter.path).write(profile, start)
+      reporter.read.should eq(expected)
     end
 
     it 'omits app root' do
-      reporter = StringIO.new
-      Pilfer::Logger.new(reporter, :app_root => spec_root).
-        write(profile, Time.at(42))
-      first_file_from_reporter(reporter).should eq('files/test.rb')
+      Pilfer::Logger.new(reporter.path, :app_root => spec_root).
+        write(profile, start)
+      first_file_from_reporter.should eq('files/test.rb')
     end
 
     it 'omits app root with trailing separator' do
-      reporter = StringIO.new
-      Pilfer::Logger.new(reporter, :app_root => spec_root + '/').
-        write(profile, Time.at(42))
-      first_file_from_reporter(reporter).should eq('files/test.rb')
+      Pilfer::Logger.new(reporter.path, :app_root => spec_root + '/').
+        write(profile, start)
+      first_file_from_reporter.should eq('files/test.rb')
     end
   end
 end

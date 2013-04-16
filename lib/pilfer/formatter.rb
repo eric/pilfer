@@ -13,16 +13,15 @@ module Pilfer
                             'calls'     => calls }
         end
 
-        total, child, exclusive,
+        total_wall, child_wall, exclusive_wall,
           total_cpu, child_cpu, exclusive_cpu = lines[0]
 
-        files[file] = { 'total'         => total,
-                        'child'         => child,
-                        'exclusive'     => exclusive,
-                        'total_cpu'     => total_cpu,
-                        'child_cpu'     => child_cpu,
-                        'exclusive_cpu' => exclusive_cpu,
-                        'lines'         => profile_lines }
+        wall = total_wall
+        cpu  = total_cpu
+
+        files[file] = { 'wall_time' => wall,
+                        'cpu_time'  => cpu,
+                        'lines'     => profile_lines }
       end
 
       {
