@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.homepage = 'https://github.com/eric/pilfer'
   spec.licenses = ['MIT']
 
-  spec.files = %w(Gemfile LICENSE Rakefile README.md)
+  spec.files = %w(Gemfile LICENSE README.md)
   spec.files << 'pilfer.gemspec'
   spec.files += Dir.glob('lib/**/*.rb')
   spec.files += Dir.glob('test/**/*.rb')
