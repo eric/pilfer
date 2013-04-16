@@ -3,7 +3,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'pilfer/version'
 
 Gem::Specification.new do |spec|
-  spec.name     = 'piler'
+  spec.name     = 'pilfer'
   spec.version  = Pilfer::VERSION
   spec.summary  = 'Look into your ruby with rblineprof'
   spec.authors  = ['Eric Lindvall', 'Larry Marburger']
