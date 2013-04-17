@@ -1,8 +1,19 @@
-# Formatting a profile as JSON may eventually be provided by rblineprof.
 module Pilfer
-  module Formatter
-    def self.json(profile, profile_start)
-      files = profile.each_with_object({}) do |(file, lines), files|
+  class Profile
+    include Enumerable
+    attr_accessor :data, :start
+
+    def initialize(data, start)
+      @data  = data
+      @start = start
+    end
+
+    def each(&block)
+      files.each(&block)
+    end
+
+    def files
+      data.each_with_object({}) do |(file, lines), files|
         profile_lines = lines[1..-1].
                           each_with_index.
                           each_with_object({}) do |(data, number), lines|
@@ -23,14 +34,6 @@ module Pilfer
                         'cpu_time'  => cpu,
                         'lines'     => profile_lines }
       end
-
-      {
-        'profile' => {
-          'version'   => '0.2.5',
-          'timestamp' => profile_start.to_i,
-          'files'     => files
-        }
-      }
     end
   end
 end
