@@ -24,4 +24,9 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rack', '~> 1.5.2'
 
   spec.required_rubygems_version = '>= 1.3.6'
+
+  # Bundled latest rblineprof
+  spec.extensions = 'ext/extconf.rb'
+  spec.files += Dir.glob('ext/*')
+  spec.add_dependency 'debugger-ruby_core_source', '~> 1.2'
 end
