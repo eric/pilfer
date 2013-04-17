@@ -40,6 +40,7 @@ module Pilfer
     end
 
     def print_file_source_with_profile(file, path, data)
+      return unless File.exists?(path)
       File.readlines(path).each_with_index do |line_source, index|
         line_profile = data['lines'][index]
         if line_profile && line_profile['calls'] > 0

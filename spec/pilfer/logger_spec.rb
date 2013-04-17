@@ -4,10 +4,10 @@ require 'pilfer/logger'
 
 describe Pilfer::Logger do
   let(:spec_root) { File.expand_path('..', File.dirname(__FILE__)) }
-  let(:profile) {
+  let(:profile)   {
     profile_file    = File.join(spec_root, 'files', 'profile.json')
     profile_content = File.read(profile_file).gsub('SPEC_ROOT', spec_root)
-    @profile        = JSON.parse(profile_content)
+    JSON.parse(profile_content)
   }
   let(:reporter) { Tempfile.new('reporter') }
   let(:start)    { Time.at(42) }
@@ -73,6 +73,22 @@ EOS
       first_file_from_reporter.should eq('files/test.rb')
     end
 
-    it 'omits source of nonexistent files'
+    context 'with a nonexistent file' do
+      let(:profile) {{
+        "(eval)" => [[113692, 31, 5026, 5313, 18, 4868], [0, 0, 0]]
+      }}
+
+      it 'omits the source of the nonexistent file' do
+        expected = <<-EOS
+##################################################
+# 1970-01-01 00:00:42 UTC
+##################################################
+
+(eval) wall_time=113.7ms cpu_time=5.3ms
+EOS
+        Pilfer::Logger.new(reporter.path).write(profile, start)
+        reporter.read.should eq(expected)
+      end
+    end
   end
 end
