@@ -72,5 +72,7 @@ EOS
         write(profile, start)
       first_file_from_reporter.should eq('files/test.rb')
     end
+
+    it 'omits source of nonexistent files'
   end
 end
