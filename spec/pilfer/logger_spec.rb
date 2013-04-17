@@ -90,5 +90,11 @@ EOS
         reporter.read.should eq(expected)
       end
     end
+
+    it 'appends to the log file' do
+      3.times { Pilfer::Logger.new(reporter.path).write(profile, start) }
+      reports = reporter.read.split('# 1970-01-01 00:00:42 UTC').size - 1
+      reports.should eq(3)
+    end
   end
 end

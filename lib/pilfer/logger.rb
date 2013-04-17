@@ -14,7 +14,7 @@ module Pilfer
 
     def write(profile_data, profile_start)
       profile = Pilfer::Profile.new(profile_data, profile_start)
-      File.open(path, 'w') do |file|
+      File.open(path, 'a') do |file|
         print_report_banner file, profile_start
         profile.each do |path, data|
           print_file_banner file, path, data
