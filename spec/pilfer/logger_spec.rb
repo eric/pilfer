@@ -9,31 +9,24 @@ describe Pilfer::Logger do
     profile_content = File.read(profile_file).gsub('SPEC_ROOT', spec_root)
     JSON.parse(profile_content)
   }
-  let(:reporter) { Tempfile.new('reporter') }
+  let(:reporter) { StringIO.new }
   let(:start)    { Time.at(42) }
-
-  after do
-    reporter.close
-    reporter.unlink
-  end
-
-  def first_file_from_reporter
-    reporter.
-      read.
-      split("\n\n")[1].
-      split("\n").
-      first.
+  let(:output) {
+    reporter.string.each_line.map {|line|
+      line.sub(/I, \[[^\]]+\]  INFO -- : /, '')
+    }.join
+  }
+  let(:first_file) {
+    output.
+      split("\n")[1].
       split(' ').
       first
-  end
+  }
 
   describe '#write' do
     it 'writes profile to reporter' do
       expected = <<-EOS
-##################################################
-# 1970-01-01 00:00:42 UTC
-##################################################
-
+Profile start=1970-01-01 00:00:42 UTC
 #{spec_root}/files/test.rb wall_time=113.7ms cpu_time=5.3ms
                    | require 'bundler/setup'
                    | require 'pilfer/logger'
@@ -52,25 +45,23 @@ describe Pilfer::Logger do
    108.4ms (   10) |     sleep 0.01
                    |   end
                    | end
-
 #{spec_root}/files/hello.rb wall_time=0.0ms cpu_time=0.0ms
      0.0ms (    2) | print 'Hello '
-
 EOS
-      Pilfer::Logger.new(reporter.path).write(profile, start)
-      reporter.read.should eq(expected)
+      Pilfer::Logger.new(reporter).write(profile, start)
+      output.should eq(expected)
     end
 
     it 'omits app root' do
-      Pilfer::Logger.new(reporter.path, :app_root => spec_root).
+      Pilfer::Logger.new(reporter, :app_root => spec_root).
         write(profile, start)
-      first_file_from_reporter.should eq('files/test.rb')
+      first_file.should eq('files/test.rb')
     end
 
     it 'omits app root with trailing separator' do
-      Pilfer::Logger.new(reporter.path, :app_root => spec_root + '/').
+      Pilfer::Logger.new(reporter, :app_root => spec_root + '/').
         write(profile, start)
-      first_file_from_reporter.should eq('files/test.rb')
+      first_file.should eq('files/test.rb')
     end
 
     context 'with a nonexistent file' do
@@ -80,21 +71,17 @@ EOS
 
       it 'omits the source of the nonexistent file' do
         expected = <<-EOS
-##################################################
-# 1970-01-01 00:00:42 UTC
-##################################################
-
+Profile start=1970-01-01 00:00:42 UTC
 (eval) wall_time=113.7ms cpu_time=5.3ms
 EOS
-        Pilfer::Logger.new(reporter.path).write(profile, start)
-        reporter.read.should eq(expected)
+        Pilfer::Logger.new(reporter).write(profile, start)
+        output.should eq(expected)
       end
     end
 
     it 'appends to the log file' do
-      3.times { Pilfer::Logger.new(reporter.path).write(profile, start) }
-      reports = reporter.read.split('# 1970-01-01 00:00:42 UTC').size - 1
-      reports.should eq(3)
+      3.times { Pilfer::Logger.new(reporter).write(profile, start) }
+      output.scan('Profile start=').size.should eq(3)
     end
   end
 end

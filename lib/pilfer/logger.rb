@@ -1,11 +1,12 @@
+require 'logger'
 require 'pilfer/profile'
 
 module Pilfer
   class Logger
-    attr_reader :path, :app_root
+    attr_reader :app_root, :logger
 
-    def initialize(path, options = {})
-      @path = path
+    def initialize(path_or_io, options = {})
+      @logger = ::Logger.new(path_or_io)
       if (app_root = options[:app_root])
         app_root += '/' unless app_root[-1] == '/'
         @app_root = %r{^#{Regexp.escape(app_root)}}
@@ -14,46 +15,41 @@ module Pilfer
 
     def write(profile_data, profile_start)
       profile = Pilfer::Profile.new(profile_data, profile_start)
-      File.open(path, 'a') do |file|
-        print_report_banner file, profile_start
-        profile.each do |path, data|
-          print_file_banner file, path, data
-          print_file_source_with_profile file, path, data
-        end
+      print_report_banner profile_start
+      profile.each do |path, data|
+        print_file_banner path, data
+        print_file_source_with_profile path, data
       end
     end
 
     private
 
-    def print_report_banner(file, profile_start)
-      file.puts '#' * 50
-      file.puts "# #{profile_start.utc.to_s}"
-      file.puts '#' * 50
-      file.puts
+    def print_report_banner(profile_start)
+      logger.info "Profile start=#{profile_start.utc.to_s}"
     end
 
-    def print_file_banner(file, path, data)
+    def print_file_banner(path, data)
       wall = data['wall_time'] / 1000.0
       cpu  = data['cpu_time']  / 1000.0
-      file.puts sprintf("%s wall_time=%.1fms cpu_time=%.1fms",
-                        strip_app_root(path), wall, cpu)
+      logger.info sprintf("%s wall_time=%.1fms cpu_time=%.1fms",
+                          strip_app_root(path), wall, cpu)
     end
 
-    def print_file_source_with_profile(file, path, data)
+    def print_file_source_with_profile(path, data)
       return unless File.exists?(path)
       File.readlines(path).each_with_index do |line_source, index|
+        line_source  = line_source.chomp
         line_profile = data['lines'][index]
         if line_profile && line_profile['calls'] > 0
           total = line_profile['wall_time']
-          file.puts sprintf("% 8.1fms (% 5d) | %s",
-                            total/1000.0,
-                            line_profile['calls'],
-                            line_source)
+          logger.info sprintf("% 8.1fms (% 5d) | %s",
+                              total/1000.0,
+                              line_profile['calls'],
+                              line_source)
         else
-          file.puts sprintf("                   | %s", line_source)
+          logger.info sprintf("                   | %s", line_source)
         end
       end
-      file.puts
     end
 
     def strip_app_root(path)
