@@ -6,8 +6,8 @@ Gem::Specification.new do |spec|
   spec.name     = 'pilfer'
   spec.version  = Pilfer::VERSION
   spec.summary  = 'Look into your ruby with rblineprof'
-  spec.authors  = ['Eric Lindvall', 'Larry Marburger']
-  spec.email    = 'larry@marburger.cc'
+  spec.authors  = ['Eric Lindvall',       'Larry Marburger']
+  spec.email    = ['eric@sevenscale.com', 'larry@marburger.cc']
   spec.homepage = 'https://github.com/eric/pilfer'
   spec.licenses = ['MIT']
 
