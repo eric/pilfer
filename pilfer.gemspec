@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.authors  = ['Eric Lindvall',       'Larry Marburger']
   spec.email    = ['eric@sevenscale.com', 'larry@marburger.cc']
   spec.homepage = 'https://github.com/eric/pilfer'
-  spec.licenses = ['MIT']
+  spec.license  = 'MIT'
 
   spec.files = %w(Gemfile LICENSE README.md)
   spec.files << 'pilfer.gemspec'
