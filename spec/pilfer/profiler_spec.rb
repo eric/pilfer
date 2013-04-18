@@ -1,3 +1,4 @@
+require 'helper'
 require 'pilfer/profiler'
 
 describe Pilfer::Profiler do

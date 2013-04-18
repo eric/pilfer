@@ -1,3 +1,4 @@
+require 'helper'
 require 'json'
 require 'tempfile'
 require 'pilfer/logger'
