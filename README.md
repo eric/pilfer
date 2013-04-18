@@ -77,9 +77,9 @@ reporter = Pilfer::Server.new('https://pilfer.com', 'abc123')
 Profile your Rack or Rails app using `Pilfer::Middleware`.
 
 ```ruby
-reporter = Pilfer::Server.new('https://pilfer.com', 'abc123'
-                              :app_root => Rails.root)
-use Pilfer::Middleware, reporter
+reporter = Pilfer::Logger.new($stdout, :app_root => Rails.root)
+profiler = Pilfer::Profiler.new(reporter)
+use Pilfer::Middleware :profiler => profiler
 ```
 
 Restrict the files profiled by passing a regular expression with
@@ -87,14 +87,15 @@ Restrict the files profiled by passing a regular expression with
 
 ```ruby
 matcher = %r{^#{Regexp.escape(Rails.root.to_s)}/(app|config|lib|vendor/plugin)}
-use Pilfer::Middleware, reporter, :files_matching => matcher
+use Pilfer::Middleware, :files_matching => matcher,
+                        :profiler       => profiler
 ```
 
 You probably don't want to profile _every_ request. The given block will be
 evaluated on each request to determine if a profile should be run.
 
 ```ruby
-use Pilfer::Middleware, reporter do
+use Pilfer::Middleware, :profiler => profiler do
   # Profile 1% of requests.
   rand(100) == 1
 end
@@ -103,7 +104,7 @@ end
 The Rack environment is available to allow profiling on demand.
 
 ```ruby
-use Pilfer::Middleware, reporter do |env|
+use Pilfer::Middleware, :profiler => profiler do |env|
   env.query_string.include? 'profile=true'
 end
 ```
