@@ -2,7 +2,7 @@ require 'helper'
 require 'pilfer/profiler'
 
 describe Pilfer::Profiler do
-  let(:reporter) { stub(:reporter, write: nil) }
+  let(:reporter) { stub(:reporter, :write => nil) }
   let(:start)    { stub(:start) }
 
   describe '#profile' do
@@ -26,7 +26,7 @@ describe Pilfer::Profiler do
     end
 
     it 'writes profile to reporter' do
-      profiler = stub(:profiler, call: :profiler_response)
+      profiler = stub(:profiler, :call => :profiler_response)
       reporter.should_receive(:write).with(:profiler_response, start)
       Pilfer::Profiler.new(reporter).profile(profiler, start) { }
     end
@@ -43,7 +43,7 @@ describe Pilfer::Profiler do
     end
 
     it 'writes profile to reporter' do
-      profiler = stub(:profiler, call: :profiler_response)
+      profiler = stub(:profiler, :call => :profiler_response)
       reporter.should_receive(:write).with(:profiler_response, start)
       Pilfer::Profiler.new(reporter).
         profile_files_matching(matcher, profiler, start) { }

@@ -29,6 +29,12 @@ describe Pilfer::Profile do
         actual[file] = data
       end
       expected = {
+        "#{spec_root}/files/hello.rb" => {
+          "wall_time" => 31,
+          "cpu_time"  => 18,
+          "lines"     => {
+            0 => { "wall_time" => 31, "cpu_time" => 18, "calls" => 2} }
+        },
         "#{spec_root}/files/test.rb" => {
           "wall_time" => 113692,
           "cpu_time"  => 5313,
@@ -38,14 +44,17 @@ describe Pilfer::Profile do
             13 => { "wall_time" => 108607, "cpu_time" => 409,  "calls" => 1 },
             14 => { "wall_time" => 108404, "cpu_time" => 310,  "calls" => 10 }
           }
-        },
-        "#{spec_root}/files/hello.rb" => {
-          "wall_time" => 31,
-          "cpu_time"  => 18,
-          "lines"     => {
-            0 => { "wall_time" => 31, "cpu_time" => 18, "calls" => 2} }
         }
       }
+      actual.should eq(expected)
+    end
+
+    it 'yields each file alphabetically' do
+      actual = []
+      subject.each do |file, data|
+        actual << file
+      end
+      expected = %W(#{spec_root}/files/hello.rb #{spec_root}/files/test.rb)
       actual.should eq(expected)
     end
   end

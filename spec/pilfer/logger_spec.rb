@@ -28,6 +28,8 @@ describe Pilfer::Logger do
     it 'writes profile to reporter' do
       expected = <<-EOS
 Profile start=1970-01-01 00:00:42 UTC
+#{spec_root}/files/hello.rb wall_time=0.0ms cpu_time=0.0ms
+     0.0ms (    2) | print 'Hello '
 #{spec_root}/files/test.rb wall_time=113.7ms cpu_time=5.3ms
                    | require 'bundler/setup'
                    | require 'pilfer/logger'
@@ -46,8 +48,6 @@ Profile start=1970-01-01 00:00:42 UTC
    108.4ms (   10) |     sleep 0.01
                    |   end
                    | end
-#{spec_root}/files/hello.rb wall_time=0.0ms cpu_time=0.0ms
-     0.0ms (    2) | print 'Hello '
 EOS
       Pilfer::Logger.new(reporter).write(profile, start)
       output.should eq(expected)
@@ -56,13 +56,13 @@ EOS
     it 'omits app root' do
       Pilfer::Logger.new(reporter, :app_root => spec_root).
         write(profile, start)
-      first_file.should eq('files/test.rb')
+      first_file.should eq('files/hello.rb')
     end
 
     it 'omits app root with trailing separator' do
       Pilfer::Logger.new(reporter, :app_root => spec_root + '/').
         write(profile, start)
-      first_file.should eq('files/test.rb')
+      first_file.should eq('files/hello.rb')
     end
 
     context 'with a nonexistent file' do

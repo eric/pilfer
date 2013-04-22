@@ -4,9 +4,9 @@ require 'pilfer/middleware'
 
 describe Pilfer::Middleware do
   let(:env)      { Rack::MockRequest.env_for }
-  let(:app)      { stub(:app, call: nil) }
-  let(:profiler) { stub(:profiler, profile: nil) }
-  let(:options)  {{ profiler: profiler }}
+  let(:app)      { stub(:app, :call => nil) }
+  let(:profiler) { stub(:profiler, :profile => nil) }
+  let(:options)  {{ :profiler => profiler }}
   let(:guard)    { Proc.new do true end }
   subject { Pilfer::Middleware.new(app, options, &guard) }
 
@@ -28,7 +28,8 @@ describe Pilfer::Middleware do
 
   context 'with file matcher' do
     let(:file_matcher) { stub(:file_matcher) }
-    let(:options)      {{ file_matcher: file_matcher, profiler: profiler }}
+    let(:options)      {{ :file_matcher => file_matcher,
+                          :profiler     => profiler }}
 
     it 'passes file matcher to profiler and calls the downstream app' do
       app.should_receive(:call).with(env).once

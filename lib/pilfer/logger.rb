@@ -8,7 +8,7 @@ module Pilfer
     def initialize(path_or_io, options = {})
       @logger = ::Logger.new(path_or_io)
       if (app_root = options[:app_root])
-        app_root += '/' unless app_root[-1] == '/'
+        app_root += '/' unless app_root[-1, 1] == '/'
         @app_root = %r{^#{Regexp.escape(app_root)}}
       end
     end
@@ -25,7 +25,8 @@ module Pilfer
     private
 
     def print_report_banner(profile_start)
-      logger.info "Profile start=#{profile_start.utc.to_s}"
+      formatted_start = profile_start.utc.strftime('%Y-%m-%d %H:%M:%S UTC')
+      logger.info "Profile start=#{formatted_start}"
     end
 
     def print_file_banner(path, data)

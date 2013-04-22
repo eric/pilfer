@@ -29,7 +29,7 @@ module Pilfer
     end
 
     def default_profiler
-      reporter = Pilfer::Logger.new($stdout, app_root: ENV['PWD'])
+      reporter = Pilfer::Logger.new($stdout, :app_root => ENV['PWD'])
       Pilfer::Profiler.new(reporter)
     end
   end

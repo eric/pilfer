@@ -9,19 +9,18 @@ module Pilfer
     end
 
     def each(&block)
-      files.each(&block)
+      files.to_a.sort_by(&:first).each(&block)
     end
 
     def files
-      data.each_with_object({}) do |(file, lines), files|
-        profile_lines = lines[1..-1].
-                          each_with_index.
-                          each_with_object({}) do |(data, number), lines|
+      data.inject({}) do |files, (file, lines)|
+        profile_lines = {}
+        lines[1..-1].each_with_index do |data, number|
           next unless data.any? {|datum| datum > 0 }
           wall_time, cpu_time, calls = data
-          lines[number] = { 'wall_time' => wall_time,
-                            'cpu_time'  => cpu_time,
-                            'calls'     => calls }
+          profile_lines[number] = { 'wall_time' => wall_time,
+                                    'cpu_time'  => cpu_time,
+                                    'calls'     => calls }
         end
 
         total_wall, child_wall, exclusive_wall,
@@ -33,6 +32,7 @@ module Pilfer
         files[file] = { 'wall_time' => wall,
                         'cpu_time'  => cpu,
                         'lines'     => profile_lines }
+        files
       end
     end
   end
