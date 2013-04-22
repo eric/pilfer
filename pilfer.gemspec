@@ -19,10 +19,7 @@ Gem::Specification.new do |spec|
   spec.test_files = Dir.glob('spec/**/*.rb')
 
   spec.add_dependency 'rblineprof', '~> 0.3.2'
-
   spec.add_development_dependency 'bundler', '~> 1.0'
-  spec.add_development_dependency 'rspec'
-  spec.add_development_dependency 'rack', '~> 1.5.2'
 
   spec.required_rubygems_version = '>= 1.3.6'
 end
