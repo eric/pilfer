@@ -14,9 +14,9 @@ Gem::Specification.new do |spec|
   spec.files = %w(Gemfile LICENSE README.md)
   spec.files << 'pilfer.gemspec'
   spec.files += Dir.glob('lib/**/*.rb')
-  spec.files += Dir.glob('test/**/*.rb')
+  spec.files += Dir.glob('spec/**/*.rb')
   spec.files += Dir.glob('script/*')
-  spec.test_files = Dir.glob('test/**/*.rb')
+  spec.test_files = Dir.glob('spec/**/*.rb')
 
   spec.add_dependency 'rblineprof', '~> 0.3.2'
 
