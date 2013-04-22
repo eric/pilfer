@@ -18,15 +18,12 @@ Gem::Specification.new do |spec|
   spec.files += Dir.glob('script/*')
   spec.test_files = Dir.glob('test/**/*.rb')
 
+  spec.add_dependency 'rblineprof', '~> 0.3.2'
+
   spec.add_development_dependency 'bundler', '~> 1.0'
   spec.add_development_dependency 'rspec'
   spec.add_development_dependency 'rake'
   spec.add_development_dependency 'rack', '~> 1.5.2'
 
   spec.required_rubygems_version = '>= 1.3.6'
-
-  # Bundled latest rblineprof
-  spec.extensions = 'ext/extconf.rb'
-  spec.files += Dir.glob('ext/*')
-  spec.add_dependency 'debugger-ruby_core_source', '~> 1.2'
 end
