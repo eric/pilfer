@@ -15,7 +15,7 @@ profiler.profile { do_something }
 Profile your Rack or Rails app using `Pilfer::Middleware`.
 
 ```ruby
-reporter = Pilfer::Logger.new($stdout, :app_root => Rails.root)
+reporter = Pilfer::Logger.new('pilfer.log')
 profiler = Pilfer::Profiler.new(reporter)
 use Pilfer::Middleware :profiler => profiler
 ```
