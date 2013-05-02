@@ -12,10 +12,32 @@ profiler = Pilfer::Profiler.new(reporter)
 profiler.profile { do_something }
 ```
 
+Profile your Rack or Rails app using `Pilfer::Middleware`.
+
+```ruby
+reporter = Pilfer::Logger.new($stdout, :app_root => Rails.root)
+profiler = Pilfer::Profiler.new(reporter)
+use Pilfer::Middleware :profiler => profiler
+```
+
 The report prints the source of each line of code executed and includes the
 total execution time and the number of times the line was executed.
 
-_TODO: Show profile response._
+```
+Profile start=2013-05-02 14:17:26 UTC
+test.rb wall_time=1009.5ms cpu_time=0.5ms
+                   | require 'bundler/setup'
+                   | require 'pilfer/logger'
+                   | require 'pilfer/profiler'
+                   |
+                   | l = Pilfer::Logger.new('log')
+                   | p = Pilfer::Profiler.new(l)
+                   | p.profile_files_matching('/Users/Larry/Sites/pilfer/test.rb') do
+  1009.5ms (    1) |   10.times do
+  1009.3ms (   10) |     sleep 0.1
+                   |   end
+                   | end
+```
 
 ### Step 1: Create a reporter
 
@@ -54,8 +76,8 @@ profiler.profile { do_something }
 
 Every file that's executed by the block--including code outside the
 application like gems and standard libraries--will be included in the profile.
-Use `#profile_files_matching` and provide a regular expression to limit
-profiling to only matching file paths.
+Use `#profile_files_matching` to limit profiling to files matching a regular
+expression.
 
 ```ruby
 matcher = %r{^#{Regexp.escape(Rails.root.to_s)}/app/models}
@@ -82,17 +104,17 @@ profiler = Pilfer::Profiler.new(reporter)
 use Pilfer::Middleware :profiler => profiler
 ```
 
-Restrict the files profiled by passing a regular expression with
-`:files_matching`.
+Restrict profiling to files matching a regular expression using the
+`:files_matching` option.
 
 ```ruby
 matcher = %r{^#{Regexp.escape(Rails.root.to_s)}/(app|config|lib|vendor/plugin)}
-use Pilfer::Middleware, :files_matching => matcher,
-                        :profiler       => profiler
+use Pilfer::Middleware, :profiler       => profiler,
+                        :files_matching => matcher
 ```
 
-You probably don't want to profile _every_ request. The given block will be
-evaluated on each request to determine if a profile should be run.
+You probably don't want to profile _every_ request. Provide a block to
+determine if a profile should be run on the incoming request.
 
 ```ruby
 use Pilfer::Middleware, :profiler => profiler do
@@ -106,6 +128,10 @@ The Rack environment is available to allow profiling on demand.
 ```ruby
 use Pilfer::Middleware, :profiler => profiler do |env|
   env.query_string.include? 'profile=true'
+end
+
+use Pilfer::Middleware, :profiler => profiler do |env|
+  env['HTTP_PROFILE_AUTHORIZATION'] == 'super-secret'
 end
 ```
 
