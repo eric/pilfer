@@ -12,10 +12,10 @@ module Pilfer
       @token = token
     end
 
-    def write(profile_data, profile_start)
+    def write(profile_data, profile_start, description)
       details = { 'hostname'     => Socket.gethostname,
                   'pid'          => Process.pid,
-                  'description'  => nil,
+                  'description'  => description,
                   'file_sources' => file_sources_for_profile(profile_data) }
 
       payload = RbLineProfFormat.

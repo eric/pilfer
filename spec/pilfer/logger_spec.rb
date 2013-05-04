@@ -10,9 +10,10 @@ describe Pilfer::Logger do
     profile_content = File.read(profile_file).gsub('SPEC_ROOT', spec_root)
     JSON.parse(profile_content)
   }
-  let(:reporter) { StringIO.new }
-  let(:start)    { Time.at(42) }
-  let(:output) {
+  let(:description) { "GET /" }
+  let(:reporter)    { StringIO.new }
+  let(:start)       { Time.at(42) }
+  let(:output)      {
     reporter.string.each_line.map {|line|
       line.sub(/I, \[[^\]]+\]  INFO -- : /, '')
     }.join
@@ -27,7 +28,7 @@ describe Pilfer::Logger do
   describe '#write' do
     it 'writes profile to reporter' do
       expected = <<-EOS
-Profile start=1970-01-01 00:00:42 UTC
+Profile start="1970-01-01 00:00:42 UTC" description="GET /"
 #{spec_root}/files/hello.rb wall_time=0.0ms cpu_time=0.0ms
      0.0ms (    2) | print 'Hello '
 #{spec_root}/files/test.rb wall_time=113.7ms cpu_time=5.3ms
@@ -49,19 +50,19 @@ Profile start=1970-01-01 00:00:42 UTC
                    |   end
                    | end
 EOS
-      Pilfer::Logger.new(reporter).write(profile, start)
+      Pilfer::Logger.new(reporter).write(profile, start, description)
       output.should eq(expected)
     end
 
     it 'omits app root' do
       Pilfer::Logger.new(reporter, :app_root => spec_root).
-        write(profile, start)
+        write(profile, start, description)
       first_file.should eq('files/hello.rb')
     end
 
     it 'omits app root with trailing separator' do
       Pilfer::Logger.new(reporter, :app_root => spec_root + '/').
-        write(profile, start)
+        write(profile, start, description)
       first_file.should eq('files/hello.rb')
     end
 
@@ -72,16 +73,18 @@ EOS
 
       it 'omits the source of the nonexistent file' do
         expected = <<-EOS
-Profile start=1970-01-01 00:00:42 UTC
+Profile start="1970-01-01 00:00:42 UTC" description="GET /"
 (eval) wall_time=113.7ms cpu_time=5.3ms
 EOS
-        Pilfer::Logger.new(reporter).write(profile, start)
+        Pilfer::Logger.new(reporter).write(profile, start, description)
         output.should eq(expected)
       end
     end
 
     it 'appends to the log file' do
-      3.times { Pilfer::Logger.new(reporter).write(profile, start) }
+      3.times {
+        Pilfer::Logger.new(reporter).write(profile, start, description)
+      }
       output.scan('Profile start=').size.should eq(3)
     end
   end

@@ -2,14 +2,15 @@ require 'helper'
 require 'pilfer/profiler'
 
 describe Pilfer::Profiler do
-  let(:reporter) { stub(:reporter, :write => nil) }
-  let(:start)    { stub(:start) }
+  let(:reporter)    { stub(:reporter, :write => nil) }
+  let(:start)       { stub(:start) }
+  let(:description) { stub(:description) }
 
   describe '#profile' do
     it 'profiles all files by default' do
       profiler = stub(:profiler)
       profiler.should_receive(:call).with(/./)
-      Pilfer::Profiler.new(reporter).profile(profiler) { }
+      Pilfer::Profiler.new(reporter).profile(description, profiler) { }
     end
 
     it 'returns value of app' do
@@ -18,17 +19,18 @@ describe Pilfer::Profiler do
         :profiler_response
       }
 
-      response = Pilfer::Profiler.new(reporter).profile(profiler) {
-        :app_response
-      }
+      response = Pilfer::Profiler.new(reporter).
+        profile(description, profiler) { :app_response }
 
       response.should eq(:app_response)
     end
 
     it 'writes profile to reporter' do
       profiler = stub(:profiler, :call => :profiler_response)
-      reporter.should_receive(:write).with(:profiler_response, start)
-      Pilfer::Profiler.new(reporter).profile(profiler, start) { }
+      reporter.should_receive(:write).
+        with(:profiler_response, start, description)
+      Pilfer::Profiler.new(reporter).
+        profile(description, profiler, start) { }
     end
   end
 
@@ -39,14 +41,15 @@ describe Pilfer::Profiler do
       profiler = stub(:profiler)
       profiler.should_receive(:call).with(matcher)
       Pilfer::Profiler.new(reporter).
-        profile_files_matching(matcher, profiler) { }
+        profile_files_matching(matcher, description, profiler) { }
     end
 
     it 'writes profile to reporter' do
       profiler = stub(:profiler, :call => :profiler_response)
-      reporter.should_receive(:write).with(:profiler_response, start)
+      reporter.should_receive(:write).
+        with(:profiler_response, start, description)
       Pilfer::Profiler.new(reporter).
-        profile_files_matching(matcher, profiler, start) { }
+        profile_files_matching(matcher, description, profiler, start) { }
     end
   end
 end

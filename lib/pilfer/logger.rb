@@ -13,9 +13,9 @@ module Pilfer
       end
     end
 
-    def write(profile_data, profile_start)
+    def write(profile_data, profile_start, description)
       profile = Pilfer::Profile.new(profile_data, profile_start)
-      print_report_banner profile_start
+      print_report_banner profile_start, description
       profile.each do |path, data|
         print_file_banner path, data
         print_file_source_with_profile path, data
@@ -24,9 +24,10 @@ module Pilfer
 
     private
 
-    def print_report_banner(profile_start)
+    def print_report_banner(profile_start, description)
       formatted_start = profile_start.utc.strftime('%Y-%m-%d %H:%M:%S UTC')
-      logger.info "Profile start=#{formatted_start}"
+      logger.info %{Profile start="#{formatted_start}" } +
+                    %{description="#{description}"}
     end
 
     def print_file_banner(path, data)
