@@ -12,7 +12,7 @@ describe Pilfer::Middleware do
 
   it 'profiles and calls the downstream app' do
     app.should_receive(:call).with(env).once
-    profiler.should_receive(:profile).with(no_args).and_yield
+    profiler.should_receive(:profile).with("GET /").and_yield
     subject.call(env)
   end
 
@@ -33,8 +33,8 @@ describe Pilfer::Middleware do
 
     it 'passes file matcher to profiler and calls the downstream app' do
       app.should_receive(:call).with(env).once
-      profiler.should_receive(:profile_files_matching).with(file_matcher).
-        and_yield
+      profiler.should_receive(:profile_files_matching).
+        with(file_matcher, "GET /").and_yield
       subject.call(env)
     end
   end
