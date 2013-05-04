@@ -22,7 +22,7 @@ module Pilfer
                   profile_to_json(profile_data, profile_start).
                   merge(details)
 
-      Thread.new(payload) do
+      Thread.new(payload) do |payload|
         submit_profile payload
       end
     end
