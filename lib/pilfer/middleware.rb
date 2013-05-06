@@ -35,7 +35,7 @@ module Pilfer
     end
 
     def request_description(env)
-      [ env["REQUEST_METHOD"], env["PATH_INFO"] ].join(' ')
+      "#{env["REQUEST_METHOD"]} #{env["PATH_INFO"]}"
     end
   end
 end
