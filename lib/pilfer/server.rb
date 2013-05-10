@@ -30,7 +30,7 @@ module Pilfer
     private
 
     def submit_profile(payload)
-      request = Net::HTTP::Post.new('/api/v1/profiles')
+      request = Net::HTTP::Post.new('/api/profiles')
       request.content_type = 'application/json'
       request['Authorization'] = %{Token token="#{token}"}
       request.body = JSON.generate(payload)
