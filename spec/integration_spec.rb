@@ -1,8 +1,6 @@
 require 'helper'
 require 'stringio'
-require 'pilfer/logger'
-require 'pilfer/profiler'
-require 'pilfer/server'
+require 'pilfer'
 
 describe Pilfer do
   context 'reporting to a Pilfer::Logger' do
