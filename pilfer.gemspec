@@ -5,11 +5,15 @@ require 'pilfer/version'
 Gem::Specification.new do |spec|
   spec.name     = 'pilfer'
   spec.version  = Pilfer::VERSION
-  spec.summary  = 'Look into your ruby with rblineprof'
   spec.authors  = ['Eric Lindvall',       'Larry Marburger']
   spec.email    = ['eric@sevenscale.com', 'larry@marburger.cc']
   spec.homepage = 'https://github.com/eric/pilfer'
   spec.license  = 'MIT'
+
+  spec.summary     = 'line-profiler for ruby and rack'
+  spec.description = 'pilfer uses rblineprof to measure how long each line ' +
+                     'of code takes to execute and the number of times it '  +
+                     'was called.'
 
   spec.files = %w(Gemfile LICENSE README.md)
   spec.files << 'pilfer.gemspec'
