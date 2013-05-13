@@ -142,6 +142,17 @@ profiler.profile_files_matching(matcher, 'User.find_by_email') do
 end
 ```
 
+Additional arguments to `#profile` and `#profile_files_matching` will be
+passed to the reporter. The `Pilfer::Server` reporter, for example, can submit
+profiles asynchronously.
+
+```ruby
+profiler.profile('bubble sorting', :submit => :async) do
+  array = (0..100).to_a.shuffle
+  bubble_sort array
+end
+```
+
 ## Extras
 
 ### Pilfer Server

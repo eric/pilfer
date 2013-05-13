@@ -23,9 +23,9 @@ module Pilfer
     def run_profiler(description, &downstream)
       if file_matcher
         profiler.profile_files_matching(file_matcher, description,
-                                        &downstream)
+                                        :submit => :async, &downstream)
       else
-        profiler.profile(description, &downstream)
+        profiler.profile(description, :submit => :async, &downstream)
       end
     end
 

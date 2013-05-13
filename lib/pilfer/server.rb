@@ -14,6 +14,7 @@ module Pilfer
     end
 
     def write(profile_data, profile_start, description, options = {})
+      async   = (options[:submit] || :sync) == :async
       details = { 'hostname'     => Socket.gethostname,
                   'pid'          => Process.pid,
                   'description'  => description,
@@ -23,7 +24,11 @@ module Pilfer
                   profile_to_json(profile_data, profile_start).
                   merge(details)
 
-      Thread.new(payload) do |payload|
+      if async
+        Thread.new(payload) do |payload|
+          submit_profile payload
+        end
+      else
         submit_profile payload
       end
     end
