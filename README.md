@@ -43,7 +43,7 @@ Profile your Rack or Rails app using `Pilfer::Middleware`.
 ```ruby
 reporter = Pilfer::Logger.new('pilfer.log')
 profiler = Pilfer::Profiler.new(reporter)
-use Pilfer::Middleware :profiler => profiler
+use Pilfer::Middleware, :profiler => profiler
 ```
 
 The profile report consists of the wall time and call count for each line of
@@ -179,7 +179,7 @@ Profile your entire Rack or Rails app using `Pilfer::Middleware`. Pass it a
 ```ruby
 reporter = Pilfer::Server.new('https://pilfer.com', 'my-pilfer-server-token')
 profiler = Pilfer::Profiler.new(reporter)
-use Pilfer::Middleware :profiler => profiler
+use Pilfer::Middleware, :profiler => profiler
 ```
 
 Restrict profiling to files matching a regular expression using the
