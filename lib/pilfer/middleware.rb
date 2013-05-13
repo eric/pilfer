@@ -9,7 +9,7 @@ module Pilfer
       @app           = app
       @profiler      = options[:profiler] || default_profiler
       @file_matcher  = options[:file_matcher]
-      @profile_guard = profile_guard
+      @profile_guard = profile_guard || proc { true }
     end
 
     def call(env)

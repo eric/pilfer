@@ -53,4 +53,14 @@ describe Pilfer::Middleware do
       subject.call(env)
     end
   end
+
+  context 'with no guard' do
+    subject { Pilfer::Middleware.new(app, options) }
+
+    it 'profiles and calls the downstream app' do
+      profiler.should_receive(:profile).and_yield
+      app.should_receive(:call).with(env)
+      subject.call(env)
+    end
+  end
 end
