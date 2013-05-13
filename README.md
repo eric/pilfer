@@ -7,7 +7,7 @@ execute and the number of times it was called.
 
 ![Pilfer Profile.png](http://cl.ly/image/2a1d332M2w05/Pilfer%20Profile.png)
 
-Take a look at some [Pilfer profiles of the the Bundler API site][bundler-pilfer].
+Take a look at some [Pilfer profiles of the Bundler API site][bundler-pilfer].
 
 ## Installation
 
