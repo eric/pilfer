@@ -13,7 +13,7 @@ module Pilfer
       end
     end
 
-    def write(profile_data, profile_start, description)
+    def write(profile_data, profile_start, description, options = {})
       profile = Pilfer::Profile.new(profile_data, profile_start)
       print_report_banner profile_start, description
       profile.each do |path, data|

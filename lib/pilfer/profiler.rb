@@ -8,19 +8,19 @@ module Pilfer
       @reporter = reporter
     end
 
-    def profile(description = nil, profiler = method(:lineprof),
-                start = Time.now, &app)
-      profile_files_matching(/./, description, profiler, start, &app)
+    def profile(*args, &app)
+      profile_files_matching(/./, *args, &app)
     end
 
     def profile_files_matching(matcher, description = nil,
+                               reporter_options = {},
                                profiler = method(:lineprof),
                                start = Time.now, &app)
       app_response = nil
       profile = profiler.call(matcher) do
         app_response = app.call
       end
-      reporter.write profile, start, description
+      reporter.write profile, start, description, reporter_options
       app_response
     end
   end

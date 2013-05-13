@@ -87,5 +87,11 @@ EOS
       }
       output.scan('Profile start=').size.should eq(3)
     end
+
+    it 'ignores optional options' do
+      Pilfer::Logger.new(reporter, :app_root => spec_root).
+        write(profile, start, description, :async => false)
+      output.should_not be_nil
+    end
   end
 end

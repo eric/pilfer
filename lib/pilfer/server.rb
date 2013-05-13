@@ -7,12 +7,13 @@ module Pilfer
   class Server
     attr_accessor :uri, :token
 
-    def initialize(uri, token)
+    def initialize(uri, token, options = {})
       @uri   = URI.parse(uri)
       @token = token
+      @async = options[:async] || true
     end
 
-    def write(profile_data, profile_start, description)
+    def write(profile_data, profile_start, description, options = {})
       details = { 'hostname'     => Socket.gethostname,
                   'pid'          => Process.pid,
                   'description'  => description,
