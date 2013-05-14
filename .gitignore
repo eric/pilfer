@@ -1,0 +1,8 @@
+/Sites/pilfer/rb master $ cat .gitignore
+## General
+pkg/*
+
+## Bundler
+*.gem
+.bundle
+Gemfile.lock
