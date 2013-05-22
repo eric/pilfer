@@ -188,8 +188,8 @@ the given regular expression.
 
 ```ruby
 matcher = %r{^#{Regexp.escape(Rails.root.to_s)}/(app|config|lib|vendor/plugin)}
-use Pilfer::Middleware, :profiler       => profiler,
-                        :files_matching => matcher
+use Pilfer::Middleware, :profiler     => profiler,
+                        :file_matcher => matcher
 ```
 
 You almost certainly don't want to profile _every_ request. Provide a block to
