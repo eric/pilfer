@@ -207,7 +207,7 @@ The Rack environment is available to allow profiling on demand.
 ```ruby
 # Profile requests containing the query string ?profile=true
 use Pilfer::Middleware, :profiler => profiler do |env|
-  env.query_string.include? 'profile=true'
+  env["QUERY_STRING"].include? 'profile=true'
 end
 
 # Profile requests containing a header whose value matches a secret
