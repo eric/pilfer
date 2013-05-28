@@ -12,6 +12,14 @@ module Pilfer
       profile_files_matching(/./, *args, &app)
     end
 
+    def profile_if(*args, &app)
+      if args.shift
+        profile(*args, &app)
+      else
+        app.call
+      end
+    end
+
     def profile_files_matching(matcher, description = nil,
                                reporter_options = {},
                                profiler = method(:lineprof),
