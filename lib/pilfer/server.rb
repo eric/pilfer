@@ -74,10 +74,10 @@ class RbLineProfFormat
     files = profile_data.each_with_object({}) do |(file, lines), files|
       profile_lines = lines[1..-1].
                         each_with_index.
-                        each_with_object({}) do |(data, number), lines|
+                        each_with_object({}) do |(data, number), inner_lines|
         next unless data.any? {|datum| datum > 0 }
         wall_time, cpu_time, calls = data
-        lines[number] = { 'wall_time' => wall_time,
+        inner_lines[number] = { 'wall_time' => wall_time,
                           'cpu_time'  => cpu_time,
                           'calls'     => calls }
       end
