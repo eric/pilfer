@@ -11,6 +11,7 @@ module Pilfer
       @uri   = URI.parse(uri)
       @token = token
       @async = options[:async] || true
+      @on_error = options[:on_error] || lambda { |ex| $stdout.puts "Pilfer::Server Exception: #{ex.class}: #{ex.message}:\n#{ex.backtrace.join("\n\t")}" }
     end
 
     def write(profile_data, profile_start, description, options = {})
@@ -57,7 +58,7 @@ module Pilfer
         response.error!
       end
     rescue Exception => ex
-      $stdout.puts ex.message, ex.backtrace
+      @on_error.call(ex)
     end
 
     def file_sources_for_profile(profile_data)
