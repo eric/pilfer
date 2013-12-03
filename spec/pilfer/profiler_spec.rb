@@ -33,6 +33,12 @@ describe Pilfer::Profiler do
       Pilfer::Profiler.new(reporter).
         profile(description, reporter_options, profiler, start) { }
     end
+
+    it 'should not run if conditioned and condition is false' do
+      reporter.should_not_receive(:write)
+      Pilfer::Profiler.new(reporter).
+        profile_if(false, description, reporter_options, profiler, start) { }
+    end
   end
 
   describe '#profile_files_matching' do
